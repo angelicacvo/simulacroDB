@@ -1,5 +1,5 @@
 const APP_URL = "http://localhost:3000/"
-const tbody_clients = document.getElementById("tbody_clients");
+const tbody_users = document.getElementById("tbody_users");
 
 const addButton = document.getElementById("addButton");
 document.getElementById('upload_users').addEventListener('click', async () => {
@@ -18,18 +18,18 @@ document.getElementById('upload_users').addEventListener('click', async () => {
   const res = await fetch(APP_URL + "users");
   const data = await res.json();
   console.log("GET:", data);
-  tbody_clients.innerHTML = "";
-  data.forEach(cliente => {
-    tbody_clients.innerHTML += `
+  tbody_users.innerHTML = "";
+  data.forEach(user => {
+    tbody_users.innerHTML += `
       <tr>
-        <td>${cliente.document_number}</td>
-        <td>${cliente.full_name}</td>
-        <td>${cliente.address}</td>
-        <td>${cliente.phone_number}</td>
-        <td>${cliente.email}</td>
+        <td>${user.id_document}</td>
+        <td>${user.full_name}</td>
+        <td>${user.address}</td>
+        <td>${user.phone_number}</td>
+        <td>${user.email}</td>
         <td>
-             <button class="btn btn-sm btn-warning" onclick="updateData(${cliente.document_number})">update</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteData(${cliente.document_number})">Eliminar</button>
+             <button class="btn btn-sm btn-warning" onclick="updateData(${user.id_document})">update</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteData(${user.id_document})">Eliminar</button>
 
         </td>
     </tr>
@@ -42,13 +42,13 @@ document.getElementById('upload_users').addEventListener('click', async () => {
 async function store() {
 
   try {
-    const user_document_number = document.getElementById("user_document_number").value.trim();
+    const user_id_document = document.getElementById("user_id_document").value.trim();
     const user_full_name = document.getElementById("user_full_name").value.trim();
     const user_address = document.getElementById("user_address").value.trim();
     const user_phone_number = document.getElementById("user_phone_number").value.trim();
     const user_email = document.getElementById("user_email").value.trim();
 
-    if (!user_document_number || !user_full_name || !user_address || !user_phone_number || !user_email) {
+    if (!user_id_document || !user_full_name || !user_address || !user_phone_number || !user_email) {
       alert("Todos los campos son obligatorios");
       return;
     }
@@ -68,7 +68,7 @@ async function store() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        document_number: user_document_number, 
+        id_document: user_id_document, 
         full_name: user_full_name ,
         address: user_address,
         phone_number: user_phone_number,
@@ -92,8 +92,6 @@ async function store() {
 
 addButton?.addEventListener("click", store);
 
-
-
 function deleteData(id) {
   if (confirm("¿Seguro que quieres eliminar este cliente?")) {
     fetch(APP_URL + "users/" + id, {
@@ -114,19 +112,19 @@ function deleteData(id) {
   }
 }
 
-
-function updateData(document_number) {
-  fetch(APP_URL + 'users/' + document_number) // ← coincide con tu backend
+function updateData(id) {
+  fetch(APP_URL + 'users/' + id)
     .then(res => {
-      if (!res.ok) throw new Error('No se pudo obtener el cliente');
+      if (!res.ok) throw new Error('No se pudo obtener el usuario');
       return res.json();
     })
-    .then(cliente => {
-      // Coincidir con los nombres reales de la base de datos
-      document.getElementById('client_name').value = cliente.full_name;
-      document.getElementById('client_email').value = cliente.email;
+    .then(user => {
+      document.getElementById("user_full_name").value = user.full_name;
+      document.getElementById("user_address").value = user.address;
+      document.getElementById("user_phone_number").value = user.phone_number;
+      document.getElementById("user_email").value = user.email;
 
-      document.getElementById('courseModalLabel').textContent = 'Editar cliente';
+      document.getElementById('courseModalLabel').textContent = 'Editar usuario';
 
       const modalEl = document.getElementById('courseModal');
       const modal = new bootstrap.Modal(modalEl);
@@ -135,41 +133,43 @@ function updateData(document_number) {
       const addButton = document.getElementById('addButton');
       addButton.textContent = 'Actualizar';
 
-      // Evita duplicar eventos
       addButton.replaceWith(addButton.cloneNode(true));
       const newAddButton = document.getElementById('addButton');
 
       newAddButton.addEventListener('click', async () => {
-        const full_name = document.getElementById('client_name').value.trim();
-        const email = document.getElementById('client_email').value.trim();
+        const user_full_name = document.getElementById("user_full_name").value.trim();
+        const user_address = document.getElementById("user_address").value.trim();
+        const user_phone_number = document.getElementById("user_phone_number").value.trim();
+        const user_email = document.getElementById("user_email").value.trim();
 
-        if (!full_name || !email) {
+        if (!user_full_name || !user_address || !user_phone_number || !user_email) {
           alert('Todos los campos son obligatorios');
           return;
         }
 
         try {
-          const res = await fetch(APP_URL + 'update-user/' + document_number, {
+          const res = await fetch(APP_URL + 'update-user/' + id, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ full_name, email }) // usa las claves correctas
+            body: JSON.stringify({user_full_name, user_address, user_phone_number, user_email})
           });
 
-          if (!res.ok) throw new Error('Error al actualizar cliente');
+          if (!res.ok) throw new Error('Error al actualizar usuario');
 
-          alert('Cliente actualizado correctamente');
+          alert('Usuario actualizado correctamente');
           modal.hide();
           location.reload();
         } catch (error) {
           console.error(error);
-          alert('Error al actualizar cliente');
+          alert('Error al actualizar usuario');
         }
       });
     })
     .catch(err => {
       console.error(err);
-      alert('No se pudo cargar el cliente para editar');
+      alert('No se pudo cargar el usuario para editar');
     });
 }
+
 
 

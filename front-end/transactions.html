@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Appointments</title>
+    <title>Transaccions</title>
     <link rel="stylesheet" href="./css/styles.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
@@ -17,8 +17,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="float-end m-0 p-0">
-          Bienvenido Robinson
-          <a href="./login.html" class="btn btn-outline-danger">Salir</a>
+          Bienvenidx
         </h5>
       </div>
     </div>
@@ -29,31 +28,21 @@
             <div class="card-body">
               <div class="list-group">
                 <a
-                  href="./clients.html"
-                  class="list-group-item list-group-item-action"
+                  href="./transactions.html"
+                  class="list-group-item list-group-item-action "
                   aria-current="true"
                 >
-                  clientes
+                  Transaccions
                 </a>
                 <a
-                  href="./doctors.html"
+                  href="./invoices.html"
                   class="list-group-item list-group-item-action"
-                  >Doctores</a
+                  >Facturas</a
                 >
                 <a
-                  href="./locations.html"
-                  class="list-group-item list-group-item-action"
-                  >Sedes</a
-                >
-                <a
-                  href="./specialities.html"
-                  class="list-group-item list-group-item-action"
-                  >Especialidades</a
-                >
-                <a
-                  href="./appointments.html"
+                  href="./transactions.html"
                   class="list-group-item list-group-item-action active"
-                  >Citas</a
+                  >Transacciones</a
                 >
               </div>
             </div>
@@ -68,7 +57,7 @@
                 data-bs-toggle="modal"
                 data-bs-target="#courseModal"
               >
-                agregar Cita
+                Agregar Transaccion
               </button>
               <div
                 class="modal fade"
@@ -81,7 +70,7 @@
                   <div class="modal-content shadow-lg">
                     <div class="modal-header">
                       <h5 class="modal-title" id="courseModalLabel">
-                        Registrar cita
+                        Registrar Transaccion
                       </h5>
                       <button
                         type="button"
@@ -94,132 +83,86 @@
                       <form id="newCourseForm">
                         <div class="mb-3">
                           <label
-                            for="client_date"
+                            for="transaction_id_transaction"
                             class="form-label text-black"
+                            >Transaccion:</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="transaction_id_transaction"
+                            required
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="transaction_date" class="form-label text-black"
                             >Fecha:</label
                           >
                           <input
                             type="date"
                             class="form-control"
-                            id="client_date"
+                            id="transaction_date"
                             required
                           />
                         </div>
+
                         <div class="mb-3">
-                          <label
-                            for="client_hour"
-                            class="form-label text-black"
+                          <label for="transaction_hour" class="form-label text-black"
                             >Hora:</label
                           >
                           <input
                             type="time"
                             class="form-control"
-                            id="client_hour"
+                            id="transaction_hour"
                             required
                           />
                         </div>
+
                         <div class="mb-3">
-                          <label
-                            for="client_reason"
-                            class="form-label text-black"
-                            >Razon:</label
+                          <label for="transaction_amount" class="form-label text-black"
+                            >Cantidad:</label
                           >
                           <input
-                            type="text"
+                            type="number"
                             class="form-control"
-                            id="client_reason"
+                            id="transaction_amount"
                             required
                           />
                         </div>
+
                         <div class="mb-3">
-                          <label
-                            for="client_observations"
-                            class="form-label text-black"
-                            >Observaciones:</label
-                          >
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="client_observations"
-                            required
-                          />
-                        </div>
-                        
-                        <div class="mb-3">
-                          <label
-                            for="client_payment"
-                            class="form-label text-black"
-                            >Metodo de pago:</label
-                          >
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="client_payment"
-                            required
-                          />
-                        </div>
-                        <div class="mb-3">
-                          <label
-                            for="client_state"
-                            class="form-label text-black"
+                          <label for="transaction_status" class="form-label text-black"
                             >Estado:</label
                           >
                           <input
                             type="text"
                             class="form-control"
-                            id="client_state"
+                            id="transaction_status"
                             required
                           />
                         </div>
+
                         <div class="mb-3">
-                          <label
-                            for="client_id_client"
-                            class="form-label text-black"
-                            >cliente:</label
+                          <label for="transaction_type" class="form-label text-black"
+                            >Tipo:</label
                           >
                           <input
                             type="text"
                             class="form-control"
-                            id="client_id_client"
+                            id="transaction_type"
                             required
                           />
                         </div>
+
                         <div class="mb-3">
-                          <label
-                            for="client_id_doctor"
-                            class="form-label text-black"
-                            >Doctor:</label
+                          <label for="transaction_id_invoice" class="form-label text-black"
+                            >id factura:</label
                           >
                           <input
                             type="text"
                             class="form-control"
-                            id="client_id_doctor"
-                            required
-                          />
-                        </div>
-                        <div class="mb-3">
-                          <label
-                            for="client_id_speciality"
-                            class="form-label text-black"
-                            >Especialidad:</label
-                          >
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="client_id_speciality"
-                            required
-                          />
-                        </div>
-                        <div class="mb-3">
-                          <label
-                            for="client_id_location"
-                            class="form-label text-black"
-                            >Sede:</label
-                          >
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="client_id_location"
+                            id="transaction_id_invoice"
                             required
                           />
                         </div>
@@ -245,27 +188,24 @@
                   </div>
                 </div>
               </div>
-              <button id="upload_appointments" class="btn btn-warning">
-                Subir CSV Appointments
+              <button id="upload_transactions" class="btn btn-warning">
+                Subir CSV Transaccions
               </button>
               <div class="table-responsive mt-3">
                 <table class="table table-hover table-border">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Numero de transacción</th>
                       <th>Fecha</th>
                       <th>Hora</th>
-                      <th>Razon</th>
-                      <th>Observaciones</th>
-                      <th>Metodo de pago</th>
+                      <th>Cantidad</th>
                       <th>Estado</th>
-                      <th>cliente</th>
-                      <th>Doctor</th>
-                      <th>Especialidad</th>
-                      <th>Sede</th>
+                      <th>Tipo</th>
+                      <th>Id transacción</th>
+                      <th>Acciones</th>
                     </tr>
                   </thead>
-                  <tbody id="tbody_appointments"></tbody>
+                  <tbody id="tbody_transactions"></tbody>
                 </table>
               </div>
             </div>
@@ -274,7 +214,7 @@
       </div>
     </div>
 
-    <script src="./js/appointments.js"></script>
+    <script src="./js/transactions.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"

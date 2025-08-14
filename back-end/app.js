@@ -3,11 +3,9 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const {
-  cargarusersDesdeCSV,
-  cargardoctorsDesdeCSV,
-  cargarlocationsDesdeCSV,
-  cargarspecialitiesDesdeCSV,
-  cargarappointmentsDesdeCSV
+  uploadUsersFromCSV,
+  uploadInvoicesFromCSV,
+  uploadTransactionsFromCSV
 } = require('./uploadcsv');
 
 const app = express();
@@ -17,7 +15,7 @@ app.use(cors());
 
 const pool = mysql.createPool({
   host: process.env.HOST,
-  user: process.env.USER,
+  user: process.env.DB_USER,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
   port: process.env.PORT
@@ -25,13 +23,13 @@ const pool = mysql.createPool({
 
 
 app.post('/upload-users', async (req, res) => {
-  cargarusersDesdeCSV();
+  uploadUsersFromCSV();
   res.json({ message: 'Proceso de carga inciado' });
 });
 
 app.get("/users", async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM clients");
+    const [rows] = await pool.query("SELECT * FROM users");
     return res.json(rows);
   } catch (error) {
     console.error(error);
@@ -40,17 +38,17 @@ app.get("/users", async (req, res) => {
 });
 
 app.post('/upload-user', async (req, res) => {
-  const { document_number, full_name, address, phone_number, email } = req.body;
+  const { id_document, full_name, address, phone_number, email } = req.body;
 
   try {
     const [result] = await pool.query(
-      `INSERT IGNORE INTO clients(document_number, full_name, address, phone_number, email) 
-            VALUES (?, ?, ?, ?, ?)`,
-      [document_number, full_name, address, phone_number, email]
+      `INSERT IGNORE INTO users(id_document, full_name, address, phone_number, email) 
+      VALUES (?, ?, ?, ?, ?)`,
+      [id_document, full_name, address, phone_number, email]
     );
     if (result.affectedRows > 0) {
       res.status(201).json({
-        document_number, 
+        id_document, 
         full_name, 
         address, 
         phone_number, 
@@ -65,12 +63,12 @@ app.post('/upload-user', async (req, res) => {
   }
 });
 
-
+//
 app.delete('/users/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await pool.query('DELETE FROM clients WHERE document_number = ?', [id]);
+    const [result] = await pool.query('DELETE FROM users WHERE id_document = ?', [id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'usuario no encontrado' });
@@ -84,447 +82,260 @@ app.delete('/users/:id', async (req, res) => {
 });
 
 //
-app.put('/update-user/:document_number', async (req, res) => {
-  const { document_number } = req.params;
-  const { full_name, address, phone_number, email } = req.body;
+
+app.put('/update-user/:id', async (req, res) => {
+  const { id } = req.params;
+  const { user_full_name, user_address, user_phone_number, user_email } = req.body;
 
   try {
     const [result] = await pool.query(
-      `UPDATE clients 
+      `UPDATE users 
        SET full_name = ?, address = ?, phone_number = ?, email = ?
-       WHERE document_number = ?`,
-      [full_name, address, phone_number, email, document_number]
+       WHERE id_document = ?`,
+      [user_full_name, user_address, user_phone_number, user_email, id]
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Cliente no encontrado' });
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json({ mensaje: 'Cliente actualizado correctamente' });
+    res.json({ mensaje: 'Usuario actualizado correctamente' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al actualizar el cliente' });
+    res.status(500).json({ error: 'Error al actualizar el usuario' });
   }
 });
 
-
-app.get('/users/:document_number', async (req, res) => {
-  const { document_number } = req.params;
+app.get('/users/:id', async (req, res) => {
+  const { id } = req.params;
 
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM clients WHERE document_number = ?',
-      [document_number]
+      'SELECT * FROM users WHERE id_document = ?',
+      [id]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'cliente no encontrado' });
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
     res.json(rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al obtener el cliente' });
+    res.status(500).json({ error: 'Error al obtener el paciente' });
   }
 });
 
-// app.post('/upload-doctors', async (req, res) => {
-//   cargardoctorsDesdeCSV();
-//   res.json({ message: 'Proceso de carga inciado' });
-// });
-
-// app.get("/doctors", async (req, res) => {
-//   try {
-//     const [rows] = await pool.query("SELECT * FROM doctors");
-//     return res.json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error al obtener doctores" });
-//   }
-// });
-
-
-// app.post('/upload-doctor', async (req, res) => {
-//   const { name, email } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `INSERT IGNORE INTO doctors(name) VALUES (?)`,
-//       [name]
-//     );
-//     if (result.affectedRows > 0) {
-//       res.status(201).json({
-//         id: result.insertId,
-//         name
-//       });
-//     } else {
-//       res.status(200).json({ message: 'doctor ya existente o no insertado' });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al insertar el cliente' });
-//   }
-// });
-
-// app.delete('/doctors/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [result] = await pool.query('DELETE FROM doctors WHERE id_doctor = ?', [id]);
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'Doctor no encontrado' });
-//     }
-
-//     res.json({ mensaje: 'Doctor eliminado correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al eliminar el cliente' });
-//   }
-// });
-
-// app.put('/update-doctor/:id', async (req, res) => {
-//   const { id } = req.params;
-//   const { name } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `UPDATE doctors 
-//        SET name = ?
-//        WHERE id_doctor = ?`,
-//       [name, id]
-//     );
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'Doctor no encontrado' });
-//     }
-
-//     res.json({ mensaje: 'Doctor actualizado correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al actualizar el Doctor' });
-//   }
-// });
-
-// app.get('/doctors/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [rows] = await pool.query(
-//       'SELECT * FROM doctors WHERE id_doctor = ?',
-//       [id]
-//     );
-
-//     if (rows.length === 0) {
-//       return res.status(404).json({ error: 'Doctor no encontrado' });
-//     }
-
-//     res.json(rows[0]);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al obtener el doctor' });
-//   }
-// });
-
-
-// app.post('/upload-locations', async (req, res) => {
-//   cargarlocationsDesdeCSV();
-//   res.json({ message: 'Proceso de carga inciado' });
-// });
-
-
-// app.get("/locations", async (req, res) => {
-//   try {
-//     const [rows] = await pool.query("SELECT * FROM locations");
-//     return res.json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error al obtener ubicaciones" });
-//   }
-// });
-
-
-// app.post('/upload-location', async (req, res) => {
-//   const { name } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `INSERT IGNORE INTO locations(name) VALUES (?)`,
-//       [name]
-//     );
-//     if (result.affectedRows > 0) {
-//       res.status(201).json({
-//         id: result.insertId,
-//         name
-//       });
-//     } else {
-//       res.status(200).json({ message: 'sede ya existente o no insertada' });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al insertar la sede' });
-//   }
-// });
-
-
-// app.delete('/locations/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [result] = await pool.query('DELETE FROM locations WHERE id_location = ?', [id]);
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'sede no encontrada' });
-//     }
-
-//     res.json({ mensaje: 'Sede eliminada correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al eliminar la sede' });
-//   }
-// });
-
-
-// app.put('/update-location/:id', async (req, res) => {
-//   const { id } = req.params;
-//   const { name } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `UPDATE locations 
-//        SET name = ?
-//        WHERE id_location = ?`,
-//       [name, id]
-//     );
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'Doctor no encontrado' });
-//     }
-
-//     res.json({ mensaje: 'Doctor actualizado correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al actualizar el Doctor' });
-//   }
-// });
-
-// app.get('/locations/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [rows] = await pool.query(
-//       'SELECT * FROM locations WHERE id_location = ?',
-//       [id]
-//     );
-
-//     if (rows.length === 0) {
-//       return res.status(404).json({ error: 'Doctor no encontrado' });
-//     }
-
-//     res.json(rows[0]);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al obtener el doctor' });
-//   }
-// });
-
-
-// app.post('/upload-specialities', async (req, res) => {
-//   cargarspecialitiesDesdeCSV();
-//   res.json({ message: 'Proceso de carga inciado' });
-// });
-
-// app.get("/specialities", async (req, res) => {
-//   try {
-//     const [rows] = await pool.query("SELECT * FROM specialities");
-//     return res.json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error al obtener especialidades" });
-//   }
-// });
-
-// app.post('/upload-speciality', async (req, res) => {
-//   const { name } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `INSERT IGNORE INTO specialities(name) VALUES (?)`,
-//       [name]
-//     );
-//     if (result.affectedRows > 0) {
-//       res.status(201).json({
-//         id: result.insertId,
-//         name
-//       });
-//     } else {
-//       res.status(200).json({ message: 'especialidad ya existente o no insertada' });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al insertar la especialidad' });
-//   }
-// });
-
-// app.delete('/specialities/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [result] = await pool.query('DELETE FROM specialities WHERE id_speciality = ?', [id]);
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'especialidad no encontrada' });
-//     }
-
-//     res.json({ mensaje: 'especialidad eliminada correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al eliminar la sede' });
-//   }
-// });
-
-
-// app.put('/update-speciality/:id', async (req, res) => {
-//   const { id } = req.params;
-//   const { name } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `UPDATE specialities 
-//        SET name = ?
-//        WHERE id_speciality = ?`,
-//       [name, id]
-//     );
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'Especialidad no encontrada' });
-//     }
-
-//     res.json({ mensaje: 'espacialidad actualizada correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al actualizar la especialidad' });
-//   }
-// });
-
-// app.get('/specialities/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [rows] = await pool.query(
-//       'SELECT * FROM specialities WHERE id_speciality = ?',
-//       [id]
-//     );
-
-//     if (rows.length === 0) {
-//       return res.status(404).json({ error: 'especialidad no encontrada' });
-//     }
-
-//     res.json(rows[0]);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al obtener el doctor' });
-//   }
-// });
-
-
-// app.post('/upload-appointments', async (req, res) => {
-//   cargarappointmentsDesdeCSV();
-//   res.json({ message: 'Proceso de carga inciado' });
-// });
-
-// app.get("/appointments", async (req, res) => {
-//   try {
-//     const [rows] = await pool.query(`
-//       SELECT 
-//     a.id_appointment,
-//     DATE_FORMAT(a.date, '%Y-%m-%d') AS date,
-//     a.hour,
-//     a.reason,
-//     a.observations,
-//     a.payment_method,
-//     a.status,
-//     p.name AS client_name,
-//     d.name AS doctor_name,
-//     s.name AS speciality_name,
-//     l.name AS location_name
-// FROM appointments a
-// LEFT JOIN clients p ON a.id_client = p.id_client
-// LEFT JOIN doctors d ON a.id_doctor = d.id_doctor
-// LEFT JOIN specialities s ON a.id_speciality = s.id_speciality
-// LEFT JOIN locations l ON a.id_location = l.id_location;
-// `);
-//     return res.json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error al obtener appointments" });
-//   }
-// });
-
-
-// app.post('/upload-appointment', async (req, res) => {
-//   const {
-//     date,
-//     hour,
-//     reason,
-//     observations,
-//     payment_method,
-//     status,
-//     id_client,
-//     id_doctor,
-//     id_speciality,
-//     id_location
-//   } = req.body;
-
-//   try {
-//     const [result] = await pool.query(
-//       `INSERT INTO appointments 
-//       (date, hour, reason, observations, payment_method, status, id_client, id_doctor, id_speciality, id_location) 
-//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-//       [date, hour, reason, observations, payment_method, status, id_client, id_doctor, id_speciality, id_location]
-//     );
-
-//     if (result.affectedRows > 0) {
-//       res.status(201).json({
-//         id: result.insertId,
-//         date,
-//         hour,
-//         reason,
-//         observations,
-//         payment_method,
-//         status,
-//         id_client,
-//         id_doctor,
-//         id_speciality,
-//         id_location
-//       });
-//     } else {
-//       res.status(200).json({ message: 'Cita no insertada' });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al insertar la cita' });
-//   }
-// });
-
-
-
-// app.delete('/appointments/:id', async (req, res) => {
-//   const { id } = req.params;
-
-//   try {
-//     const [result] = await pool.query('DELETE FROM appointments WHERE id_appointment = ?', [id]);
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: 'cita no encontrada' });
-//     }
-
-//     res.json({ mensaje: 'cita eliminada correctamente' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error al eliminar la cita' });
-//   }
-// });
+
+// Invoices
+app.post('/upload-invoices', async (req, res) => {
+  uploadInvoicesFromCSV();
+  res.json({ message: 'Proceso de carga inciado' });
+});
+
+app.get("/invoices", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM invoices");
+    return res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener facturas" });
+  }
+});
+
+app.post('/upload-invoice', async (req, res) => {
+  const { id_invoice,used_platform,billing_period,amount,amount_paid,id_document } = req.body;
+
+  try {
+    const [result] = await pool.query(
+      `INSERT IGNORE INTO invoices(id_invoice,used_platform,billing_period,amount,amount_paid,id_document) 
+      VALUES (?, ?, ?, ?, ?, ?)`,
+      [id_invoice,used_platform,billing_period,amount,amount_paid,id_document]
+    );
+    if (result.affectedRows > 0) {
+      res.status(201).json({
+        id_invoice,
+        used_platform,
+        billing_period,
+        amount,
+        amount_paid,
+        id_document
+      });
+    } else {
+      res.status(200).json({ message: 'factura ya existente o no insertada' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al insertar la factura' });
+  }
+});
+
+
+//
+app.delete('/invoices/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await pool.query('DELETE FROM invoices WHERE id_invoice = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'factura no encontrada' });
+    }
+
+    res.json({ mensaje: 'factura eliminada correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar la factura' });
+  }
+});
+
+app.put('/update-invoice/:id', async (req, res) => {
+  const { id } = req.params;
+  const { invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document  } = req.body;
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE invoices 
+       SET used_platform = ?, billing_period = ?, amount = ?, amount_paid = ?, id_document = ? 
+       WHERE id_invoice = ?`,
+      [invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+
+    res.json({ mensaje: 'Factura actualizada correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar la factura' });
+  }
+});
+
+app.get('/invoices/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM invoices WHERE id_invoice = ?',
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener la factura' });
+  }
+});
+
+// Transactions
+app.post('/upload-transactions', async (req, res) => {
+  uploadTransactionsFromCSV();
+  res.json({ message: 'Proceso de carga inciado' });
+});
+
+app.get("/transactions", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM transactions");
+    return res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener transacciones" });
+  }
+});
+
+app.post('/upload-transaction', async (req, res) => {
+  const { id_transaction,date,hour,amount,status,type,id_invoice } = req.body;
+
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO transactions(id_transaction,date,hour,amount,status,type,id_invoice) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id_transaction,date,hour,amount,status,type,id_invoice]
+    );
+    if (result.affectedRows > 0) {
+      res.status(201).json({
+        id_transaction,
+        date,
+        hour,
+        amount,
+        status,
+        type,
+        id_invoice
+      });
+    } else {
+      res.status(200).json({ message: 'transaccion ya existente o no insertada' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al insertar la transaccion' });
+  }
+});
+
+app.delete('/transactions/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await pool.query('DELETE FROM transactions WHERE id_transaction = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'factura no encontrada' });
+    }
+
+    res.json({ mensaje: 'Transacción eliminada correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar la transacción' });
+  }
+});
+
+app.put('/update-transaction/:id', async (req, res) => {
+  const { id } = req.params;
+  const { invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document  } = req.body;
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE invoices 
+       SET used_platform = ?, billing_period = ?, amount = ?, amount_paid = ?, id_document = ? 
+       WHERE id_invoice = ?`,
+      [invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+
+    res.json({ mensaje: 'Factura actualizada correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar la factura' });
+  }
+});
+
+app.get('/invoices/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM invoices WHERE id_invoice = ?',
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener la factura' });
+  }
+});
+
 
 app.listen(3000, () => console.log('Servidor corriendo en http://localhost:3000'));
 

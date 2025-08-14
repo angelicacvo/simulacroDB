@@ -1,4 +1,4 @@
-id_transaction,date,time,amount,status,type,invoice_number
+id_transaction,date,hour,amount,status,type,id_invoice
 txn001,2024-06-01,10:00:00 AM,38940,pendiente,pago de factura,fac7068
 txn002,2024-07-09,12:00:00 PM,75145,pendiente,pago de factura,fac6577
 txn003,2024-06-13,10:00:00 AM,179217,fallida,pago de factura,fac5707

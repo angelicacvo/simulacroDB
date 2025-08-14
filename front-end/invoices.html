@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>especialidades</title>
+    <title>Facturas</title>
     <link rel="stylesheet" href="./css/styles.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
@@ -17,8 +17,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="float-end m-0 p-0">
-          Bienvenido Robinson
-          <a href="./login.html" class="btn btn-outline-danger">Salir</a>
+          Bienvenidx
         </h5>
       </div>
     </div>
@@ -29,31 +28,21 @@
             <div class="card-body">
               <div class="list-group">
                 <a
-                  href="./clients.html"
+                  href="./users.html"
                   class="list-group-item list-group-item-action"
                   aria-current="true"
                 >
-                  clientes
+                  Usuarios
                 </a>
                 <a
-                  href="./doctors.html"
-                  class="list-group-item list-group-item-action"
-                  >Doctores</a
-                >
-                <a
-                  href="./locations.html"
-                  class="list-group-item list-group-item-action"
-                  >Sedes</a
-                >
-                <a
-                  href="./specialities.html"
+                  href="./invoices.html"
                   class="list-group-item list-group-item-action active"
-                  >Especialidades</a
+                  >Facturas</a
                 >
                 <a
-                  href="./appointments.html"
-                  class="list-group-item list-group-item-action "
-                  >Citas</a
+                  href="./transactions.html"
+                  class="list-group-item list-group-item-action"
+                  >Transacciones</a
                 >
               </div>
             </div>
@@ -68,7 +57,7 @@
                 data-bs-toggle="modal"
                 data-bs-target="#courseModal"
               >
-                agregar especialidad
+                Agregar factura
               </button>
               <div
                 class="modal fade"
@@ -81,7 +70,7 @@
                   <div class="modal-content shadow-lg">
                     <div class="modal-header">
                       <h5 class="modal-title" id="courseModalLabel">
-                        Registrar especialidad
+                        Registrar Factura
                       </h5>
                       <button
                         type="button"
@@ -94,14 +83,74 @@
                       <form id="newCourseForm">
                         <div class="mb-3">
                           <label
-                            for="speciality_name"
+                            for="invoice_id_invoice"
                             class="form-label text-black"
-                            >Nombre:</label
+                            >Id:</label
                           >
                           <input
                             type="text"
                             class="form-control"
-                            id="speciality_name"
+                            id="invoice_id_invoice"
+                            required
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="invoice_used_platform" class="form-label text-black"
+                            >Plataforma:</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="invoice_used_platform"
+                            required
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="invoice_billing_period" class="form-label text-black"
+                            >Periodo de facturación:</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="invoice_billing_period"
+                            required
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="invoice_amount" class="form-label text-black"
+                            >Monto a pagar:</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="invoice_amount"
+                            required
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="invoice_amount_paid" class="form-label text-black"
+                            >Monto pagado:</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="invoice_amount_paid"
+                            required
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="invoice_id_document" class="form-label text-black"
+                            >Documento:</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="invoice_id_document"
                             required
                           />
                         </div>
@@ -127,19 +176,23 @@
                   </div>
                 </div>
               </div>
-              <button id="upload_specialities" class="btn btn-warning">
-                Subir CSV Especialidades
+              <button id="upload_invoices" class="btn btn-warning">
+                Subir CSV Facturas
               </button>
               <div class="table-responsive mt-3">
                 <table class="table table-hover table-border">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Nombre</th>
+                      <th>Id</th>
+                      <th>Plataforma</th>
+                      <th>Periodo de pago</th>
+                      <th>Cantidad</th>
+                      <th>Cantidad pagada</th>
+                      <th>Documento</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
-                  <tbody id="tbody_specialities"></tbody>
+                  <tbody id="tbody_invoices"></tbody>
                 </table>
               </div>
             </div>
@@ -148,7 +201,7 @@
       </div>
     </div>
 
-    <script src="./js/specialities.js"></script>
+    <script src="./js/invoices.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
@@ -156,4 +209,3 @@
     ></script>
   </body>
 </html>
-  
