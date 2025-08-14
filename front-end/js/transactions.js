@@ -83,7 +83,6 @@ async function store() {
 
     await res.json();
 
-
     const modalEl = document.getElementById('courseModal');
     const modal = bootstrap.Modal.getInstance(modalEl);
     modal.hide();

@@ -48,10 +48,10 @@ app.post('/upload-user', async (req, res) => {
     );
     if (result.affectedRows > 0) {
       res.status(201).json({
-        id_document, 
-        full_name, 
-        address, 
-        phone_number, 
+        id_document,
+        full_name,
+        address,
+        phone_number,
         email
       });
     } else {
@@ -144,13 +144,13 @@ app.get("/invoices", async (req, res) => {
 });
 
 app.post('/upload-invoice', async (req, res) => {
-  const { id_invoice,used_platform,billing_period,amount,amount_paid,id_document } = req.body;
+  const { id_invoice, used_platform, billing_period, amount, amount_paid, id_document } = req.body;
 
   try {
     const [result] = await pool.query(
       `INSERT IGNORE INTO invoices(id_invoice,used_platform,billing_period,amount,amount_paid,id_document) 
       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id_invoice,used_platform,billing_period,amount,amount_paid,id_document]
+      [id_invoice, used_platform, billing_period, amount, amount_paid, id_document]
     );
     if (result.affectedRows > 0) {
       res.status(201).json({
@@ -191,14 +191,14 @@ app.delete('/invoices/:id', async (req, res) => {
 
 app.put('/update-invoice/:id', async (req, res) => {
   const { id } = req.params;
-  const { invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document  } = req.body;
+  const { invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid, invoice_id_document } = req.body;
 
   try {
     const [result] = await pool.query(
       `UPDATE invoices 
        SET used_platform = ?, billing_period = ?, amount = ?, amount_paid = ?, id_document = ? 
        WHERE id_invoice = ?`,
-      [invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document, id]
+      [invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid, invoice_id_document, id]
     );
 
     if (result.affectedRows === 0) {
@@ -249,13 +249,13 @@ app.get("/transactions", async (req, res) => {
 });
 
 app.post('/upload-transaction', async (req, res) => {
-  const { id_transaction,date,hour,amount,status,type,id_invoice } = req.body;
+  const { id_transaction, date, hour, amount, status, type, id_invoice } = req.body;
 
   try {
     const [result] = await pool.query(
       `INSERT INTO transactions(id_transaction,date,hour,amount,status,type,id_invoice) 
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id_transaction,date,hour,amount,status,type,id_invoice]
+      [id_transaction, date, hour, amount, status, type, id_invoice]
     );
     if (result.affectedRows > 0) {
       res.status(201).json({
@@ -283,7 +283,7 @@ app.delete('/transactions/:id', async (req, res) => {
     const [result] = await pool.query('DELETE FROM transactions WHERE id_transaction = ?', [id]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'factura no encontrada' });
+      return res.status(404).json({ error: 'Transacción no encontrada' });
     }
 
     res.json({ mensaje: 'Transacción eliminada correctamente' });
@@ -295,14 +295,14 @@ app.delete('/transactions/:id', async (req, res) => {
 
 app.put('/update-transaction/:id', async (req, res) => {
   const { id } = req.params;
-  const { invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document  } = req.body;
+  const { transaction_date, transaction_hour, transaction_amount, transaction_status, transaction_type, transaction_id_invoice } = req.body;
 
   try {
     const [result] = await pool.query(
-      `UPDATE invoices 
-       SET used_platform = ?, billing_period = ?, amount = ?, amount_paid = ?, id_document = ? 
-       WHERE id_invoice = ?`,
-      [invoice_used_platform, invoice_billing_period, invoice_amount, invoice_amount_paid,invoice_id_document, id]
+      `UPDATE transactions
+       SET date = ?, hour = ?, amount = ?, status = ?, type = ?, id_invoice = ? 
+       WHERE id_transaction = ?`,
+      [transaction_date, transaction_hour, transaction_amount, transaction_status, transaction_type, transaction_id_invoice, id]
     );
 
     if (result.affectedRows === 0) {
@@ -316,12 +316,12 @@ app.put('/update-transaction/:id', async (req, res) => {
   }
 });
 
-app.get('/invoices/:id', async (req, res) => {
+app.get('/transactions/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM invoices WHERE id_invoice = ?',
+      'SELECT * FROM transactions WHERE id_transaction = ?',
       [id]
     );
 
@@ -336,6 +336,37 @@ app.get('/invoices/:id', async (req, res) => {
   }
 });
 
+//Consultas avanzadas
+app.get('/users/total-paid', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id_document,
+        u.full_name,
+        COALESCE(SUM(i.amount_paid), 0) AS total_paid
+      FROM users u
+      LEFT JOIN invoices i ON u.id_document = i.id_document
+      GROUP BY u.id_document, u.full_name
+    `);
+    res.status(200).json(rows);
+
+  } catch (error) {
+    console.error('Error en /users/total-paid:', error);
+    res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+  }
+});
+
+//Endpoints
+// Total pagado por cliente:
+// GET http://localhost:3000/users/total-paid
+
+// Facturas pendientes:
+// GET http://localhost:3000/invoices/pending
+
+// Transacciones por plataforma:
+// GET http://localhost:3000/transactions/platform/Nequi
+// o
+// GET http://localhost:3000/transactions/platform/Daviplata
 
 app.listen(3000, () => console.log('Servidor corriendo en http://localhost:3000'));
 
